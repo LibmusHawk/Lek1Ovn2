@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phaser 3 Leaf</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(to bottom right, #ff8a00, #da1b60, #900c3f);
+        }
+        #loadingText { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 32px; color: #FFF; }
+        #progressBar { position: absolute; top: 60%; left: 50%; transform: translateX(-50%); width: 300px; height: 30px; background-color: #222222; }
+        #progress { width: 0%; height: 100%; background-color: #ffffff; }
+    </style>
+</head>
+<body>
+
+<div id="loadingText">Loading...</div>
+<div id="progressBar">
+    <div id="progress"></div>
+</div>
+
+<script type="text/javascript">
+class Example extends Phaser.Scene {
+    preload() {
+        // Load assets
+        this.load.image('ball', 'assets/images/Leaf.png');
+        this.load.image('Sprite2', 'assets/images/wwww.png');
+        this.load.image('Sprite1', 'assets/images/Tree3.png');
+        this.load.audio('audio1', 'assets/audio/Death.wav');
+        this.load.audio('audio2', 'assets/audio/Healthpotion.wav');
+        this.load.audio('audio3', 'assets/audio/The edn.mp3');
+        this.load.video('video', 'Assets/Video/X2Download.com-Elden Ring Opening Cinematic(720p).mp4', true)
+        this.load.video('video1', 'Assets/Video/X2Download.com-Elden Ring Opening Cinematic(720p).mp4', true)
+        this.load.video('video2', 'Assets/Video/X2Download.com-Elden Ring Opening Cinematic(720p).mp4', true)
+        this.load.video('video3', 'Assets/Video/X2Download.com-Elden Ring Opening Cinematic(720p).mp4', true)
+
+        // Display loading text
+        const loadingText = this.add.text(960, 540, '', { fontSize: '32px', fill: '#FFF', fontFamily: 'Arial' }).setOrigin(0.5);
+
+        // Create progress bar
+        const progressBar = document.getElementById('progress');
+        
+        // Show loading progress
+        this.load.on('progress', (value) => {
+            progressBar.style.width = (value * 100) + '%';
+        });
+
+        // Hide loading text and progress bar when loading completes
+        this.load.on('complete', () => {
+            loadingText.destroy();
+            document.getElementById('progressBar').style.display = 'none';
+        });
+
+        // Simulate lengthy loading process for demonstration
+        for (let i = 0; i < 1000; i++){
+            this.load.image('ball' + i, 'assets/images/Leaf.png');
+        }
+    }
+
+    create() {
+        const sprite2 = this.add.image(180, 385, 'Sprite2');
+        sprite2.setScale(1);
+        sprite2.setDepth(2);
+
+        // Set initial camera zoom
+        this.cameras.main.setZoom(1);
+
+        this.cameras.main.setBackgroundColor(0xFF97CA);
+
+        this.matter.world.setBounds(0, 0, 800, 600, 32, true, true, false, true);
+
+        // Group to hold leaves
+        this.leavesGroup = this.add.group();
+
+        // Set custom gravity to make leaves fall slower
+        this.matter.world.setGravity(0, 0.1);
+
+        this.time.addEvent({
+            delay: 4000,
+            callback: function () {
+                const leaf = this.matter.add.image(Phaser.Math.Between(100, 300), Phaser.Math.Between(200, 150), 'ball');
+                leaf.setCircle();
+                leaf.setFriction(0.005).setBounce(0.1);
+                leaf.setScale(0.8);
+                this.cameras.main.startFollow(leaf);
+
+                // Add the leaf to the group
+                this.leavesGroup.add(leaf);
+
+                // Play a random audio clip
+                this.playRandomAudio();
+
+                // Reset camera zoom
+                this.cameras.main.setZoom(1);
+
+                leaf.setDepth(2);
+            },
+            callbackScope: this,
+            repeat: 14
+        });
+
+        const sprite1 = this.add.image(200, 310, 'Sprite1');
+        sprite1.setScale(2);
+        sprite1.setDepth(2);
+
+        // Audio clips
+        this.audioClips = [
+            this.sound.add('audio1'),
+            this.sound.add('audio2'),
+            this.sound.add('audio3')
+        ];
+
+        // Hide loading text
+        document.getElementById('loadingText').style.display = 'none';
+
+        const vid1 = this.add.video(0, 0, 'video').setOrigin(0, 0).play(true);
+        vid1.setDepth(0);
+    vid1.once('play', () => {
+
+
+    vid1.setDisplaySize(400, 300);
+
+    const vid2 = this.add.video(400, 0, 'video1').setOrigin(0, 0).play(true);
+
+vid2.once('play', () => {
+
+    vid2.setDisplaySize(400, 300);
+
+});
+
+const vid3 = this.add.video(0, 300, 'video2').setOrigin(0, 0).play(true);
+
+vid3.once('play', () => {
+
+    vid3.setDisplaySize(400, 300);
+
+});
+
+const vid4 = this.add.video(400, 300, 'video3').setOrigin(0, 0).play(true);
+
+vid4.once('play', () => {
+
+    vid4.setDisplaySize(400, 300);
+
+});
+});
+    }
+
+    // Function to play a random audio clip
+    playRandomAudio() {
+        const randomIndex = Phaser.Math.Between(0, this.audioClips.length - 1);
+        const randomClip = this.audioClips[randomIndex];
+        randomClip.play();
+    }
+
+    update() {
+        // Adjust camera zoom based on the number of leaves spawned
+        this.updateCameraZoom();
+    }
+
+    // Function to update camera zoom based on the number of leaves spawned
+    updateCameraZoom() {
+        const numLeaves = this.leavesGroup.getChildren().length;
+        if (numLeaves > 0) {
+            if (this.cameras.main.zoom < 2) { // Adjust the final zoom level as needed
+                this.cameras.main.zoom += 0.001; // Adjust the zoom speed as needed
+            }
+        } else {
+            if (this.cameras.main.zoom > 1) {
+                this.cameras.main.zoom -= 0.001;
+            }
+        }
+    }
+}
+
+const config = {
+    type: Phaser.AUTO,
+    width: 1920,
+    height: 1080,
+    backgroundColor: '#000000',
+    parent: 'phaser-example',
+    physics: {
+        default: 'matter',
+        
+    },
+    scene: Example
+};
+
+const game = new Phaser.Game(config);
+
+</script>
+
+</body>
+</html>
